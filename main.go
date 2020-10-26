@@ -38,7 +38,7 @@ func main() {
 	flag.StringVar(&prefix, "prefix", filepath.Base(defaultPrefix), "prefix for metrics")
 	flag.DurationVar(&flushInterval, "flush-interval", 10*time.Second, "how often to flush metrics")
 	flag.IntVar(&spawnDrift, "spawn-drift", 10, "spread new agent generation by 0-n seconds")
-	flag.StringVar(&network, "protocol", "udp", "network protocol to use, tcp or udp Default: udp")
+	flag.StringVar(&network, "protocol", "udp", "network protocol to use, tcp or udp")
 	flag.StringVar(&tagFormat, "tag-format", "datadog", "format of the tags to send. accepted values \"datadog\" or \"influx\"")
 	flag.StringVar(&tags, "tags", "", "list of K:V comma separated tags. Example: key1:tag1,key2:tag2")
 	flag.IntVar(&counters, "counters", 50, "number of counters for each agent to hold")
@@ -63,7 +63,11 @@ func main() {
 	for i := 0; i < agents; i++ {
 		wg.Add(1)
 		go func(id int) {
-			agent := CreateAgent(id, flushInterval, statsdHost, prefix, tags, tagFormat)
+			agent, err := CreateAgent(id, flushInterval, statsdHost, prefix, tags, tagFormat)
+			if err != nil {
+				log.Printf("error instantiating agent%d: %s", id, err)
+				os.Exit(1)
+			}
 			log.Printf("launching agent %d\n", id)
 			agent.Start(ctx)
 			wg.Done()

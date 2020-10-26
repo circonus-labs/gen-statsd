@@ -13,6 +13,7 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
+//Agent is a top level struct for generating and sending StatsD data
 type Agent struct {
 	id            int
 	flushInterval time.Duration
@@ -22,7 +23,8 @@ type Agent struct {
 	statsdClient  *statsd.Client
 }
 
-func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat string) *Agent {
+//CreateAgent creates a new instance of an Agent
+func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat string) (*Agent, error) {
 	var tagOption statsd.Option
 	var tagFormatOption statsd.Option
 
@@ -38,8 +40,7 @@ func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat stri
 		var err error
 		tagOption, err = parseTags(tags)
 		if err != nil {
-			log.Println(err)
-			return nil
+			return nil, err
 		}
 	}
 
@@ -66,9 +67,10 @@ func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat stri
 		timerNames:    genMetricsNames("timer", id, timers),
 		statsdClient:  client,
 	}
-	return a
+	return a, nil
 }
 
+//Start starts an agent generating and sending metrics to the desired host
 func (a *Agent) Start(ctx context.Context) {
 	ticker := time.NewTicker(a.flushInterval)
 	for {
@@ -89,7 +91,7 @@ func (a *Agent) Start(ctx context.Context) {
 				wg.Done()
 			}()
 			wg.Wait()
-			log.Printf("metrics for agent %d created\n", a.id)
+			log.Printf("flushed %d counters, %d gauges, %d timers for agent %d\n", len(a.counterNames), len(a.gaugeNames), len(a.timerNames), a.id)
 		case <-ctx.Done():
 			ticker.Stop()
 			return
@@ -148,10 +150,13 @@ func parseTags(t string) (statsd.Option, error) {
 	for _, pairs := range kvp {
 		kv := strings.Split(pairs, ":")
 		for _, tag := range kv {
+			if tag == "" {
+				return nil, errors.New("incomplete key:value pairs")
+			}
 			tags = append(tags, tag)
 		}
 	}
-	if len(tags)%2 != 0 {
+	if len(tags) < 2 || len(tags)%2 != 0 {
 		return nil, errors.New("incomplete key:value pairs")
 	}
 	return statsd.Tags(tags...), nil
