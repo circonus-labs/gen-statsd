@@ -51,7 +51,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, os.Interrupt, unix.SIGTERM, unix.SIGHUP, unix.SIGPIPE, unix.SIGINFO)
+	// signal.Notify(sigs, os.Interrupt, unix.SIGTERM, unix.SIGHUP, unix.SIGPIPE, unix.SIGINFO)
+	signal.Notify(sigs, os.Interrupt, unix.SIGTERM, unix.SIGHUP, unix.SIGPIPE)
 	go func() {
 		sig := <-sigs
 		log.Printf("received %s, exiting\n", sig.String())
