@@ -34,6 +34,9 @@ go-gen-statsd is an experimental tool for load testing with StatsD metrics.
 
 ### From Source
 
+- Be sure to have `GOBIN` set
+- Be sure that the location of GOBIN is in your `PATH`
+
 1. Clone this repo
 1. Navigate to the repo in your filesystem
 1. Run `go install`
