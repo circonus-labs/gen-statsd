@@ -25,7 +25,7 @@ gen-statsd is an experimental tool written in Go for load testing with StatsD me
   -statsd-host string
         address of statsD host (default "localhost:8125")
   -tag-format string
-        format of the tags to send. accepted values "datadog" or "influx" (default "datadog")
+        format of the tags to send. accepted values "datadog" or "influx"
   -tags string
         list of K:V comma separated tags. Example: key1:tag1,key2:tag2
   -timers int
