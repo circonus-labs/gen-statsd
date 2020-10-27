@@ -1,11 +1,11 @@
-# go-gen-statsd
+# gen-statsd
 
-go-gen-statsd is an experimental tool for load testing with StatsD metrics.
+gen-statsd is an experimental tool written in Go for load testing with StatsD metrics.
 
 ## Usage
 
 ```
-  Usage of go-gen-statsd:
+  Usage of gen-statsd:
   -agents int
         max number of agents to run concurrently (default 10)
   -counters int
@@ -15,7 +15,7 @@ go-gen-statsd is an experimental tool for load testing with StatsD metrics.
   -gauges int
         number of gauges for each agent to hold (default 30)
   -prefix string
-        prefix for metrics (default "go-genstatsd")
+        prefix for metrics (default "gen-statsd")
   -protocol string
         network protocol to use, tcp or udp (default "udp")
   -spawn-drift int

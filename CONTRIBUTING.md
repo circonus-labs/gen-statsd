@@ -4,7 +4,7 @@ Contributions are always welcome. Please follow the below procedures for submitt
 
 - Clone this repo
 - Fork this repo
-- Add the forked repo as a remote. Ex. `git remote add <YOUR_FORK> git@github.com:<YOUR_GITHUB_USERNAME>/go-gen-statsd`
+- Add the forked repo as a remote. Ex. `git remote add <YOUR_FORK> git@github.com:<YOUR_GITHUB_USERNAME>/gen-statsd`
 - Create a new branch. Ex. `git checkout -b <YOUR_BRANCH>`
 - Make and commit your changes
   - `git add <FILES_CHANGED1> <FILES_CHANGED2>...`
