@@ -1,5 +1,7 @@
 # gen-statsd
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/circonus-labs/gen-statsd)](https://goreportcard.com/report/github.com/circonus-labs/gen-statsd)
+
 gen-statsd is an experimental tool written in Go for load testing with StatsD metrics.
 
 ## Usage
