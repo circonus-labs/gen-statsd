@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rizkybiz/go-genstatsd/internal/release"
+	"github.com/circonus-labs/gen-statsd/internal/release"
 	"golang.org/x/net/context"
 )
 
