@@ -1,3 +1,8 @@
+// Copyright © 2020 Circonus, Inc. <support@circonus.com>
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+//
+
 package main
 
 import (
@@ -25,31 +30,17 @@ type Agent struct {
 
 //CreateAgent creates a new instance of an Agent
 func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat string) (*Agent, error) {
+
+	//Setup some variables
+	var client *statsd.Client
 	var tagOption statsd.Option
 	var tagFormatOption statsd.Option
 
-	if tagFormat == "datadog" {
-		tagFormatOption = statsd.TagsFormat(statsd.Datadog)
-	}
-
-	if tagFormat == "influx" {
-		tagFormatOption = statsd.TagsFormat(statsd.InfluxDB)
-	}
-
-	if tags != "" {
-		var err error
-		tagOption, err = parseTags(tags)
-		if err != nil {
-			return nil, err
-		}
-	}
-
+	//Create the client
 	client, err := statsd.New(
 		statsd.Address(statsdHost),
 		statsd.Network(network),
 		statsd.FlushPeriod(flush),
-		tagOption,
-		tagFormatOption,
 		statsd.Prefix(prefix),
 		statsd.ErrorHandler(func(err error) {
 			log.Printf("error sending metrics: %s\n", err)
@@ -57,6 +48,29 @@ func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat stri
 	)
 	if err != nil {
 		log.Printf("error creating statsd client: %s\n", err)
+	}
+
+	//Check the tagformat
+	if tagFormat != "" {
+		if tagFormat == "datadog" {
+			tagFormatOption = statsd.TagsFormat(statsd.Datadog)
+			client = client.Clone(tagFormatOption)
+		}
+		if tagFormat == "influx" {
+			tagFormatOption = statsd.TagsFormat(statsd.InfluxDB)
+			client = client.Clone(tagFormatOption)
+		}
+		return nil, errors.New("unrecognized tag format string")
+	}
+
+	//Check for tags
+	if tags != "" {
+		var err error
+		tagOption, err = parseTags(tags)
+		if err != nil {
+			return nil, err
+		}
+		client = client.Clone(tagOption)
 	}
 
 	a := &Agent{
@@ -134,6 +148,11 @@ func (a *Agent) genTimers(ctx context.Context) {
 			break
 		}
 	}
+}
+
+//flushOnce is to facilitate controlled testing
+func (a *Agent) flushOnce() {
+	a.statsdClient.Flush()
 }
 
 func genMetricsNames(metricType string, id, n int) []string {

@@ -30,6 +30,8 @@ gen-statsd is an experimental tool written in Go for load testing with StatsD me
         list of K:V comma separated tags. Example: key1:tag1,key2:tag2
   -timers int
         number of timers for each agent to hold (default 20)
+  -version
+        show version information
 ```
 
 ## Installation

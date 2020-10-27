@@ -31,7 +31,3 @@ jobs:
     # Run tests
     - name: Run tests
       run: go test -v ./...
-
-    # Run build
-    - name: Run build
-      run: go build .
