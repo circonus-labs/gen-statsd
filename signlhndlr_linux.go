@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 //
 
-// +build linux
-
 // Signal handling for Linux
 // doesn't have SIGINFO, using SIGTRAP instead
 
@@ -22,11 +20,13 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func signalNotifySetup(ch chan os.Signal) {
+//SignalNotifySetup sets up the signals and their channel
+func SignalNotifySetup(ch chan os.Signal) {
 	signal.Notify(ch, os.Interrupt, unix.SIGTERM, unix.SIGHUP, unix.SIGPIPE, unix.SIGTRAP)
 }
 
-func handleSignals(cancel context.CancelFunc, ch chan os.Signal) {
+//HandleSignals handles exiting the program based on different signals
+func HandleSignals(cancel context.CancelFunc, ch chan os.Signal) {
 	const stackTraceBufferSize = 1 * units.MiB
 
 	//pre-allocate a buffer for stacktrace

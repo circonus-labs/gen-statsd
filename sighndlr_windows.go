@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 //
 
-// +build windows
-
 // Signal handling for Windows
 // doesn't have SIGINFO, attempt to use SIGTRAP instead...
 
@@ -17,16 +15,18 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"syscall"
 
 	"github.com/alecthomas/units"
-	"golang.org/x/sys/unix"
 )
 
-func signalNotifySetup(ch chan os.Signal) {
-	signal.Notify(ch, os.Interrupt, unix.SIGTERM, unix.SIGHUP, unix.SIGPIPE, unix.SIGTRAP)
+//SignalNotifySetup sets up the signals and their channel
+func SignalNotifySetup(ch chan os.Signal) {
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGPIPE, syscall.SIGTRAP)
 }
 
-func handleSignals(cancel context.CancelFunc, ch chan os.Signal) {
+//HandleSignals handles exiting the program based on different signals
+func HandleSignals(cancel context.CancelFunc, ch chan os.Signal) {
 	const stackTraceBufferSize = 1 * units.MiB
 
 	//pre-allocate a buffer for stacktrace
@@ -37,13 +37,13 @@ func handleSignals(cancel context.CancelFunc, ch chan os.Signal) {
 		case sig := <-ch:
 			log.Printf("signal %s received\n", sig.String())
 			switch sig {
-			case os.Interrupt, unix.SIGTERM:
+			case os.Interrupt, syscall.SIGTERM:
 				cancel()
 				log.Println("waiting for final metric flushes... press CTRL+C to exit without flushing")
 				break
-			case unix.SIGPIPE, unix.SIGHUP:
+			case syscall.SIGPIPE, syscall.SIGHUP:
 				// Noop
-			case unix.SIGTRAP:
+			case syscall.SIGTRAP:
 				stackLen := runtime.Stack(buf, true)
 				fmt.Printf("=== received SIGINFO ===\n*** goroutine dump...\n%s\n*** end\n", buf[:stackLen])
 			default:
