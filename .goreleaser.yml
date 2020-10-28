@@ -28,7 +28,37 @@ builds:
         goarch: arm64
       - goos: openbsd
         goarch: arm
+    ldflags: 
+      - -X github.com/circonus-labs/gen-statsd/internal/release.VERSION={{.Version}} 
+      - -X github.com/circonus-labs/gen-statsd/internal/release.COMMIT={{.ShortCommit}} 
+      - -X github.com/circonus-labs/gen-statsd/internal/release.DATE={{.Date}} 
+      - -X github.com/circonus-labs/gen-statsd/internal/release.TAG={{.Tag}}
+
+archives:
+  - 
+    id: default
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
+    format: tar.gz
+    replacements:
+      amd64: x86_64
+    format_overrides:
+      -
+        goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+
+release:
+    github:
+        owner: circonus-labs
+        name: gen-statsd
+
+    prerelease: auto
+
 checksum:
   name_template: "{{.ProjectName}}_checksums.txt"
+
 snapshot:
   name_template: "SNAPSHOT-{{.Commit}}"
