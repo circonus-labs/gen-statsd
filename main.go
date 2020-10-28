@@ -6,6 +6,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -16,7 +17,6 @@ import (
 	"time"
 
 	"github.com/circonus-labs/gen-statsd/internal/release"
-	"golang.org/x/net/context"
 )
 
 // config vars, to be manipulated via command line flags
@@ -63,8 +63,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	sigs := make(chan os.Signal, 1)
-	signalNotifySetup(sigs)
-	go handleSignals(cancel, sigs)
+	SignalNotifySetup(sigs)
+	go HandleSignals(cancel, sigs)
 
 	for i := 0; i < agents; i++ {
 		wg.Add(1)
