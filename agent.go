@@ -38,7 +38,7 @@ type Agent struct {
 }
 
 //NewAgentController creates a new agent pool
-func NewAgentController(n int) *AgentController {
+func NewAgentController() *AgentController {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &AgentController{
 		sig:  make(chan os.Signal, 1),

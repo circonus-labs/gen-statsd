@@ -49,6 +49,16 @@ docker run -d circonuslabs/gen-statsd:latest -agents 1 ...
 * `TIMERS` - number of timers for each agent to hold (default 20)
 * `VERSION` - show version information
 
+### Image Variants
+
+#### x86_64
+
+* `circonuslabs/gen-statsd:latest` - [Distroless](https://github.com/GoogleContainerTools/distroless) Linux based x86_64 image.
+
+#### ARM64
+
+* `circonuslabs/gen-statsd-arm64:latest` - Alpine ARM64v8 based image.
+
 ## Find Us
 
 * [GitHub](https://github.com/circonuslabs/gen-statsd)

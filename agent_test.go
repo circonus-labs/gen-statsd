@@ -66,12 +66,68 @@ func TestCreateAgent(t *testing.T) {
 	flush := time.Second * 0
 	addr := ":8125"
 	prefix := "test"
-	tags := "key1:value1,key2:value2"
-	tagFormat := "datadog"
+	goodTags := "key1:value1,key2:value2"
+	badTags := "key1:value1,key2:"
+	tagFormat1 := "datadog"
+	tagFormat2 := "influx"
+	badTagFormat := "not a tag format"
 
 	//Run tests and verify output
-	_, err := CreateAgent(id, num, num, num, flush, addr, prefix, tags, "udp", tagFormat)
+	_, err := CreateAgent(id, num, num, num, flush, addr, prefix, goodTags, "udp", tagFormat1)
 	if err != nil {
 		t.Errorf("expected no error, got: %s", err)
 	}
+	_, err = CreateAgent(id, num, num, num, flush, addr, prefix, badTags, "udp", tagFormat1)
+	if err == nil {
+		t.Errorf("expected error, got: %s", err)
+	}
+	_, err = CreateAgent(id, num, num, num, flush, addr, prefix, goodTags, "udp", tagFormat2)
+	if err != nil {
+		t.Errorf("expected no error, got: %s", err)
+	}
+	_, err = CreateAgent(id, num, num, num, flush, addr, prefix, goodTags, "udp", badTagFormat)
+	if err == nil {
+		t.Errorf("expected error, got: %s", err)
+	}
 }
+
+func TestNewAgentController(t *testing.T) {
+	ac := NewAgentController()
+	if ac == nil {
+		t.Error("expected agent controller got nil")
+	}
+}
+
+// func TestAgentControllerStart(t *testing.T) {
+// 	ac := NewAgentController()
+// 	conf := config{
+// 		statsdHost:    ":8125",
+// 		network:       "udp",
+// 		flushInterval: time.Second * 1,
+// 		counters:      1,
+// 		gauges:        0,
+// 		timers:        0,
+// 		agents:        1,
+// 		spawnDrift:    10,
+// 	}
+// 	buf := make([]byte, 1024)
+// 	go udpListen(buf)
+// 	ac.Start(conf)
+// 	time.Sleep(time.Second * 2)
+// 	ac.ctx.Done()
+
+// 	fmt.Print(string(buf))
+// }
+
+// func udpListen(buf []byte) (int, error) {
+// 	srv, err := net.ListenPacket("udp", ":8125")
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	defer srv.Close()
+// 	n, _, err := srv.ReadFrom(buf)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	return n, nil
+// }

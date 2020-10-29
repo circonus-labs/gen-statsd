@@ -56,8 +56,8 @@ dockers:
     binaries:
       - gen-statsd
     image_templates:
-      - "circonuslabs/{{.ProjectName}}:{{.Tag}}"
-      - "circonuslabs/{{.ProjectName}}:latest"
+      - "circonuslabs/{{.ProjectName}}-arm64:{{.Tag}}"
+      - "circonuslabs/{{.ProjectName}}-arm64:latest"
     skip_push: false
     dockerfile: deploy/docker/arm64/Dockerfile
     build_flag_templates:
