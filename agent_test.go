@@ -9,7 +9,10 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+	"time"
 )
+
+var agent *Agent
 
 func TestParseTags(t *testing.T) {
 
@@ -52,5 +55,23 @@ func TestGenMetricsNames(t *testing.T) {
 		if name != "agent"+strconv.Itoa(id)+"-"+metricType+strconv.Itoa(i) {
 			t.Errorf("Expected: %s, got %s", fmt.Sprintf("agent%d-%s%d", id, metricType, i), name)
 		}
+	}
+}
+
+func TestCreateAgent(t *testing.T) {
+
+	//Test Setup
+	id := 0
+	num := 1
+	flush := time.Second * 0
+	addr := ":8125"
+	prefix := "test"
+	tags := "key1:value1,key2:value2"
+	tagFormat := "datadog"
+
+	//Run tests and verify output
+	_, err := CreateAgent(id, num, num, num, flush, addr, prefix, tags, "udp", tagFormat)
+	if err != nil {
+		t.Errorf("expected no error, got: %s", err)
 	}
 }
