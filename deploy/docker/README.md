@@ -53,11 +53,19 @@ docker run -d circonuslabs/gen-statsd:latest -agents 1 ...
 
 #### x86_64
 
-* `circonuslabs/gen-statsd:latest` - [Distroless](https://github.com/GoogleContainerTools/distroless) Linux based x86_64 image.
+[Distroless](https://github.com/GoogleContainerTools/distroless) Linux based x86_64 image.
+
+* `circonuslabs/gen-statsd:latest`
+* `circonuslabs/gen-statsd:1.0`
+* `circonuslabs/gen-statsd:1.0.0`
 
 #### ARM64
 
-* `circonuslabs/gen-statsd-arm64:latest` - Alpine ARM64v8 based image.
+Alpine ARM64v8 based image.
+
+* `circonuslabs/gen-statsd:latest-arm64`
+* `circonuslabs/gen-statsd:1.0-arm64`
+* `circonuslabs/gen-statsd:1.0.0-arm64`
 
 ## Find Us
 
