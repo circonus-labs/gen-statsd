@@ -66,4 +66,4 @@ jobs:
           destination_container_repo: circonuslabs/gen-statsd
           provider: dockerhub
           short_description: 'StatsD Traffic Generator'
-          readme_file: '/deploy/docker/README.md'
+          readme_file: 'deploy/docker/README.md'
