@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -18,7 +19,15 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
-//Agent is a top level struct for generating and sending StatsD data
+//AgentController is the main controller of the agents
+type AgentController struct {
+	sig  chan os.Signal
+	wg   sync.WaitGroup
+	ctx  context.Context
+	cncl context.CancelFunc
+}
+
+//Agent is a struct for generating and sending StatsD data
 type Agent struct {
 	id            int
 	flushInterval time.Duration
@@ -28,17 +37,57 @@ type Agent struct {
 	statsdClient  *statsd.Client
 }
 
+//NewAgentController creates a new agent pool
+func NewAgentController(n int) *AgentController {
+	ctx, cancel := context.WithCancel(context.Background())
+	return &AgentController{
+		sig:  make(chan os.Signal, 1),
+		wg:   sync.WaitGroup{},
+		ctx:  ctx,
+		cncl: cancel,
+	}
+}
+
+//Start kicks off the main process of sending statsD metrics from agents
+func (ac *AgentController) Start(c config) error {
+
+	SignalNotifySetup(ac.sig)
+	go HandleSignals(ac.cncl, ac.sig)
+
+	for i := 0; i < c.agents; i++ {
+		ac.wg.Add(1)
+		go func(id int) {
+			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.flushInterval, c.statsdHost, c.prefix, c.tags, c.network, c.tagFormat)
+			if err != nil {
+				log.Printf("error instantiating agent%d: %s\n", id, err)
+				ac.ctx.Done()
+				ac.wg.Done()
+				return
+			}
+			log.Printf("launching agent %d\n", id)
+			agent.Start(ac.ctx)
+			ac.wg.Done()
+		}(i)
+		if done(ac.ctx) {
+			break
+		}
+		time.Sleep(time.Duration(rand.Intn(c.spawnDrift)) * time.Second)
+	}
+
+	ac.wg.Wait()
+	return nil
+}
+
 //CreateAgent creates a new instance of an Agent
-func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat string) (*Agent, error) {
+func CreateAgent(id, counters, gauges, timers int, flush time.Duration, addr, prefix, tags, network, tagFormat string) (*Agent, error) {
 
 	//Setup some variables
 	var client *statsd.Client
 	var tagOption statsd.Option
-	var tagFormatOption statsd.Option
 
 	//Create the client
 	client, err := statsd.New(
-		statsd.Address(statsdHost),
+		statsd.Address(addr),
 		statsd.Network(network),
 		statsd.FlushPeriod(flush),
 		statsd.Prefix(prefix),
@@ -52,15 +101,10 @@ func CreateAgent(id int, flush time.Duration, addr, prefix, tags, tagFormat stri
 
 	//Check the tagformat
 	if tagFormat != "" {
-		if tagFormat == "datadog" {
-			tagFormatOption = statsd.TagsFormat(statsd.Datadog)
-			client = client.Clone(tagFormatOption)
+		client, err = parseTagFormat(client, tagFormat)
+		if err != nil {
+			return nil, err
 		}
-		if tagFormat == "influx" {
-			tagFormatOption = statsd.TagsFormat(statsd.InfluxDB)
-			client = client.Clone(tagFormatOption)
-		}
-		return nil, errors.New("unrecognized tag format string")
 	}
 
 	//Check for tags
@@ -179,4 +223,23 @@ func parseTags(t string) (statsd.Option, error) {
 		return nil, errors.New("incomplete key:value pairs")
 	}
 	return statsd.Tags(tags...), nil
+}
+
+func parseTagFormat(client *statsd.Client, tf string) (*statsd.Client, error) {
+	if tf == "datadog" {
+		return client.Clone(statsd.TagsFormat(statsd.Datadog)), nil
+	}
+	if tf == "influx" {
+		return client.Clone(statsd.TagsFormat(statsd.InfluxDB)), nil
+	}
+	return nil, errors.New("unrecognized tag format")
+}
+
+func done(ctx context.Context) bool {
+	select {
+	case <-ctx.Done():
+		return true
+	default:
+		return false
+	}
 }
