@@ -56,3 +56,14 @@ jobs:
           args: release --rm-dist --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - 
+        name: Push Docker Readme
+        uses: christian-korneck/update-container-description-action@v1
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKER_TOKEN }}
+        with:
+          destination_container_repo: circonuslabs/gen-statsd
+          provider: dockerhub
+          short_description: 'StatsD Traffic Generator'
+          readme_file: '/deploy/docker/README.md'
