@@ -19,19 +19,19 @@ In order to run this container you'll need docker installed.
 Running with command-line parameters:
 
 ```shell
-docker run circonuslabs/gen-statsd:latest -agents 1 -statsd-host <statsd server IP>:8125 -prefix test -counters 1 -gauges 1 -timers 1 -protocol udp -spawn-drift 10 -tag-format datadog -tags key1:value1,key2:value2 
+docker run circonus/gen-statsd:latest -agents 1 -statsd-host <statsd server IP>:8125 -prefix test -counters 1 -gauges 1 -timers 1 -protocol udp -spawn-drift 10 -tag-format datadog -tags key1:value1,key2:value2 
 ```
 
 Printing the version:
 
 ```shell
-docker run circonuslabs/gen-statsd:latest -version
+docker run circonus/gen-statsd:latest -version
 ```
 
 Running in detached mode:
 
 ```shell
-docker run -d circonuslabs/gen-statsd:latest -agents 1 ...
+docker run -d circonus/gen-statsd:latest -agents 1 ...
 ```
 
 #### Environment Variables
@@ -55,21 +55,21 @@ docker run -d circonuslabs/gen-statsd:latest -agents 1 ...
 
 [Distroless](https://github.com/GoogleContainerTools/distroless) Linux based x86_64 image.
 
-* `circonuslabs/gen-statsd:latest`
-* `circonuslabs/gen-statsd:1.0`
-* `circonuslabs/gen-statsd:1.0.0`
+* `circonus/gen-statsd:latest`
+* `circonus/gen-statsd:1.0`
+* `circonus/gen-statsd:1.0.0`
 
 #### ARM64
 
 Alpine ARM64v8 based image.
 
-* `circonuslabs/gen-statsd:latest-arm64`
-* `circonuslabs/gen-statsd:1.0-arm64`
-* `circonuslabs/gen-statsd:1.0.0-arm64`
+* `circonus/gen-statsd:latest-arm64`
+* `circonus/gen-statsd:1.0-arm64`
+* `circonus/gen-statsd:1.0.0-arm64`
 
 ## Find Us
 
-* [GitHub](https://github.com/circonuslabs/gen-statsd)
+* [GitHub](https://github.com/circonus-labs/gen-statsd)
 
 ## Contributing
 
@@ -78,13 +78,13 @@ Please read [CONTRIBUTING](https://github.com/circonus-labs/gen-statsd/blob/main
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the 
-[tags on this repository](https://github.com/circonuslabs/gen-statsd/tags). 
+[tags on this repository](https://github.com/circonus-labs/gen-statsd/tags). 
 
 ## Authors
 
-* **Justin DeFrank** - [Circonus](https://github.com/circonuslabs)
+* **Justin DeFrank** - [Circonus](https://github.com/circonus-labs)
 
-See also the list of [contributors](https://github.com/circonuslabs/gen-statsd/contributors) who 
+See also the list of [contributors](https://github.com/circonus-labs/gen-statsd/contributors) who 
 participated in this project.
 
 ## License
