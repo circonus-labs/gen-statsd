@@ -41,9 +41,9 @@ dockers:
     binaries:
       - gen-statsd
     image_templates:
-      - "circonuslabs/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}"
-      - "circonuslabs/{{.ProjectName}}:{{.Major}}.{{.Minor}}"
-      - "circonuslabs/{{.ProjectName}}:latest"
+      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}"
+      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}"
+      - "circonus/{{.ProjectName}}:latest"
     skip_push: false
     dockerfile: deploy/docker/x86_64/Dockerfile
     build_flag_templates:
@@ -57,9 +57,9 @@ dockers:
     binaries:
       - gen-statsd
     image_templates:
-      - "circonuslabs/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}-arm64"
-      - "circonuslabs/{{.ProjectName}}:{{.Major}}.{{.Minor}}-arm64"
-      - "circonuslabs/{{.ProjectName}}:latest-arm64"
+      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}-arm64"
+      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}-arm64"
+      - "circonus/{{.ProjectName}}:latest-arm64"
     skip_push: false
     dockerfile: deploy/docker/arm64/Dockerfile
     build_flag_templates:

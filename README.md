@@ -61,12 +61,12 @@ gen-statsd is an experimental tool written in Go for load testing with StatsD me
 
 ### Docker
 
-See [Docker Hub](hub.docker.com/circonuslabs/gen-statsd) for additional details.
+See [Docker Hub](hub.docker.com/circonus/gen-statsd) for additional details.
 
 * Be sure to have Docker installed on your machine
 * Run: 
-  * `docker pull circonuslabs/gen-statsd:latest`
-  * `docker run -e STATSD_HOST=127.0.0.1:8125 -e AGENTS=1 ... circonuslabs/gen-statsd:latest`
+  * `docker pull circonus/gen-statsd:latest`
+  * `docker run -e STATSD_HOST=127.0.0.1:8125 -e AGENTS=1 ... circonus/gen-statsd:latest`
 * Note: You can also use the docker flag `--env-file` and provide the path to a file with the environment variables from above defined.
 
 ## Installation
