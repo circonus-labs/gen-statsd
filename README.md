@@ -61,7 +61,7 @@ gen-statsd is an experimental tool written in Go for load testing with StatsD me
 
 ### Docker
 
-See [Docker Hub](hub.docker.com/circonus/gen-statsd) for additional details.
+See [Docker Hub](https://hub.docker.com/circonus/gen-statsd) for additional details.
 
 * Be sure to have Docker installed on your machine
 * Run: 
