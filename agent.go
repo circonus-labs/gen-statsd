@@ -19,11 +19,6 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
-const (
-	timerSampleMax = 1000
-	timerSampleMin = 1
-)
-
 //AgentController is the main controller of the agents
 type AgentController struct {
 	sig  chan os.Signal
@@ -40,6 +35,8 @@ type Agent struct {
 	gaugeNames    []string
 	timerNames    []string
 	timerSamples  int
+	timerValueMax int
+	timerValueMin int
 	statsdClients []*statsd.Client
 }
 
@@ -104,7 +101,7 @@ func (ac *AgentController) Start(c config) error {
 	for i := 0; i < c.agents; i++ {
 		ac.wg.Add(1)
 		go func(id int) {
-			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.flushInterval, statsdClients, c.tags, c.tagFormat)
+			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.timerValueMax, c.timerValueMin, c.flushInterval, statsdClients, c.tags, c.tagFormat)
 			if err != nil {
 				log.Printf("error instantiating agent%d: %s\n", id, err)
 				ac.ctx.Done()
@@ -127,7 +124,7 @@ func (ac *AgentController) Start(c config) error {
 }
 
 //CreateAgent creates a new instance of an Agent
-func CreateAgent(id, counters, gauges, timers int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string) (*Agent, error) {
+func CreateAgent(id, counters, gauges, timers, timerMax, timerMin int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string) (*Agent, error) {
 
 	//Check the tagformat
 	if tagFormat != "" {
@@ -157,6 +154,8 @@ func CreateAgent(id, counters, gauges, timers int, flush time.Duration, targets 
 		counterNames:  genMetricsNames("counter", id, counters),
 		gaugeNames:    genMetricsNames("gauge", id, gauges),
 		timerNames:    genMetricsNames("timer", id, timers),
+		timerValueMax: timerMax,
+		timerValueMin: timerMin,
 		statsdClients: targets,
 	}
 	return a, nil
@@ -234,7 +233,7 @@ func (a *Agent) genGauges(ctx context.Context) {
 func (a *Agent) genTimers(ctx context.Context) {
 	for _, name := range a.timerNames {
 		for i := 0; i < a.timerSamples; i++ {
-			val := rand.Float64() * (timerSampleMax - timerSampleMin)
+			val := rand.Float64() * (float64(a.timerValueMax) - float64(a.timerValueMin))
 			for _, c := range a.statsdClients {
 				c.Timing(name, val)
 				if a.done(ctx) {
