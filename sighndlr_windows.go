@@ -9,7 +9,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -20,13 +19,13 @@ import (
 	"github.com/alecthomas/units"
 )
 
-//SignalNotifySetup sets up the signals and their channel
-func SignalNotifySetup(ch chan os.Signal) {
-	signal.Notify(ch, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGPIPE, syscall.SIGTRAP)
+//signalNotifySetup sets up the signals and their channel
+func (ac *AgentController) signalNotifySetup() {
+	signal.Notify(ac.sig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGPIPE, syscall.SIGTRAP)
 }
 
-//HandleSignals handles exiting the program based on different signals
-func HandleSignals(cancel context.CancelFunc, ch chan os.Signal) {
+//handleSignals handles exiting the program based on different signals
+func (ac *AgentController) handleSignals() {
 	const stackTraceBufferSize = 1 * units.MiB
 
 	//pre-allocate a buffer for stacktrace
@@ -34,13 +33,12 @@ func HandleSignals(cancel context.CancelFunc, ch chan os.Signal) {
 
 	for {
 		select {
-		case sig := <-ch:
+		case sig := <-ac.sig:
 			log.Printf("signal %s received\n", sig.String())
 			switch sig {
 			case os.Interrupt, syscall.SIGTERM:
-				cancel()
-				log.Println("waiting for final metric flushes... press CTRL+C to exit without flushing")
-				break
+				ac.cncl()
+				return
 			case syscall.SIGPIPE, syscall.SIGHUP:
 				// Noop
 			case syscall.SIGTRAP:
@@ -49,6 +47,8 @@ func HandleSignals(cancel context.CancelFunc, ch chan os.Signal) {
 			default:
 				log.Printf("signal %s unsupported", sig.String())
 			}
+		case <-ac.ctx.Done():
+			return
 		}
 	}
 }
