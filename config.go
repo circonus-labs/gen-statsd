@@ -26,8 +26,8 @@ type config struct {
 	sampleRate    float64
 	gauges        int
 	timers        int
-	timerValueMax int
-	timerValueMin int
+	valueMax      int
+	valueMin      int
 	timerSamples  int
 	agents        int
 	version       bool
@@ -49,8 +49,8 @@ func genConfig() config {
 	flag.StringVar(&c.tagFormat, "tag-format", "", "format of the tags to send. accepted values \"datadog\" or \"influx\"")
 	flag.StringVar(&c.tags, "tags", "", "list of K:V comma separated tags. Example: key1:tag1,key2:tag2")
 	flag.IntVar(&c.counters, "counters", 50, "number of counters for each agent to hold")
-	flag.IntVar(&c.timerValueMax, "timer-value-max", 100, "max timer value")
-	flag.IntVar(&c.timerValueMin, "timer-value-min", 0, "min timer value")
+	flag.IntVar(&c.valueMax, "value-max", 100, "maximum value")
+	flag.IntVar(&c.valueMin, "value-min", 0, "minimum value")
 	flag.IntVar(&c.gauges, "gauges", 30, "number of gauges for each agent to hold")
 	flag.IntVar(&c.timers, "timers", 20, "number of timers for each agent to hold")
 	flag.IntVar(&c.timerSamples, "timer-samples", 10, "number of timer samples per iteration")

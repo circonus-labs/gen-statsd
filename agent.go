@@ -35,8 +35,8 @@ type Agent struct {
 	gaugeNames    []string
 	timerNames    []string
 	timerSamples  int
-	timerValueMax int
-	timerValueMin int
+	valueMax      int
+	valueMin      int
 	statsdClients []*statsd.Client
 }
 
@@ -113,7 +113,7 @@ func (ac *AgentController) Start(c config) error {
 	for i := 0; i < c.agents; i++ {
 		ac.wg.Add(1)
 		go func(id int) {
-			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.timerValueMax, c.timerValueMin, c.flushInterval, statsdClients, c.tags, c.tagFormat)
+			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.valueMax, c.valueMin, c.flushInterval, statsdClients, c.tags, c.tagFormat)
 			if err != nil {
 				log.Printf("error instantiating agent%d: %s\n", id, err)
 				ac.ctx.Done()
@@ -136,7 +136,7 @@ func (ac *AgentController) Start(c config) error {
 }
 
 //CreateAgent creates a new instance of an Agent
-func CreateAgent(id, counters, gauges, timers, timerMax, timerMin int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string) (*Agent, error) {
+func CreateAgent(id, counters, gauges, timers, max, min int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string) (*Agent, error) {
 
 	//Check the tagformat
 	if tagFormat != "" {
@@ -166,8 +166,8 @@ func CreateAgent(id, counters, gauges, timers, timerMax, timerMin int, flush tim
 		counterNames:  genMetricsNames("counter", id, counters),
 		gaugeNames:    genMetricsNames("gauge", id, gauges),
 		timerNames:    genMetricsNames("timer", id, timers),
-		timerValueMax: timerMax,
-		timerValueMin: timerMin,
+		valueMax:      max,
+		valueMin:      min,
 		statsdClients: targets,
 	}
 	return a, nil
@@ -214,7 +214,7 @@ func (a *Agent) done(ctx context.Context) bool {
 
 func (a *Agent) genCounters(ctx context.Context) {
 	for _, name := range a.counterNames {
-		val := rand.Intn(10)
+		val := rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
 		for _, c := range a.statsdClients {
 			c.Count(name, val)
 			if a.done(ctx) {
@@ -229,7 +229,7 @@ func (a *Agent) genCounters(ctx context.Context) {
 
 func (a *Agent) genGauges(ctx context.Context) {
 	for _, name := range a.gaugeNames {
-		val := rand.Intn(500)
+		val := rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
 		for _, c := range a.statsdClients {
 			c.Gauge(name, val)
 			if a.done(ctx) {
@@ -245,7 +245,7 @@ func (a *Agent) genGauges(ctx context.Context) {
 func (a *Agent) genTimers(ctx context.Context) {
 	for _, name := range a.timerNames {
 		for i := 0; i < a.timerSamples; i++ {
-			val := rand.Float64() * (float64(a.timerValueMax) - float64(a.timerValueMin))
+			val := rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
 			for _, c := range a.statsdClients {
 				c.Timing(name, val)
 				if a.done(ctx) {
