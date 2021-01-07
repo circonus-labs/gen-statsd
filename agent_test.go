@@ -66,6 +66,8 @@ func TestCreateAgent(t *testing.T) {
 	id := 0
 	num := 1
 	flush := time.Second * 0
+	timerMin := 0
+	timerMax := 10
 	addr := ":8125"
 	prefix := "test"
 	goodTags := "key1:value1,key2:value2"
@@ -89,19 +91,19 @@ func TestCreateAgent(t *testing.T) {
 	clients := []*statsd.Client{client}
 
 	//Run tests and verify output
-	_, err = CreateAgent(id, num, num, num, flush, clients, goodTags, tagFormat1)
+	_, err = CreateAgent(id, num, num, num, timerMax, timerMin, flush, clients, goodTags, tagFormat1)
 	if err != nil {
 		t.Errorf("expected no error, got: %s", err)
 	}
-	_, err = CreateAgent(id, num, num, num, flush, clients, badTags, tagFormat1)
+	_, err = CreateAgent(id, num, num, num, timerMax, timerMin, flush, clients, badTags, tagFormat1)
 	if err == nil {
 		t.Errorf("expected error, got: %s", err)
 	}
-	_, err = CreateAgent(id, num, num, num, flush, clients, goodTags, tagFormat2)
+	_, err = CreateAgent(id, num, num, num, timerMax, timerMin, flush, clients, goodTags, tagFormat2)
 	if err != nil {
 		t.Errorf("expected no error, got: %s", err)
 	}
-	_, err = CreateAgent(id, num, num, num, flush, clients, goodTags, badTagFormat)
+	_, err = CreateAgent(id, num, num, num, timerMax, timerMin, flush, clients, goodTags, badTagFormat)
 	if err == nil {
 		t.Errorf("expected error, got: %s", err)
 	}
