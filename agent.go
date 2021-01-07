@@ -42,6 +42,7 @@ type Agent struct {
 
 //NewAgentController creates a new agent pool
 func NewAgentController() *AgentController {
+	rand.Seed(time.Now().UnixNano())
 	ctx, cancel := context.WithCancel(context.Background())
 	return &AgentController{
 		sig:  make(chan os.Signal, 1),
@@ -54,8 +55,16 @@ func NewAgentController() *AgentController {
 //Start kicks off the main process of sending statsD metrics from agents
 func (ac *AgentController) Start(c config) error {
 
-	SignalNotifySetup(ac.sig)
-	go HandleSignals(ac.cncl, ac.sig)
+	if c.runTime > time.Duration(0) {
+		go func() {
+			time.Sleep(c.runTime)
+			log.Printf("run time (%s) reached, cancelling", c.runTime.String())
+			ac.cncl()
+		}()
+	}
+
+	ac.signalNotifySetup()
+	go ac.handleSignals()
 
 	targets := strings.Split(c.statsdHosts, ",")
 	statsdClients := make([]*statsd.Client, 0)

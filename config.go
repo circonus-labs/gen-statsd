@@ -20,6 +20,7 @@ type config struct {
 	tags          string
 	tagFormat     string
 	flushInterval time.Duration
+	runTime       time.Duration
 	spawnDrift    int
 	counters      int
 	gauges        int
@@ -41,6 +42,7 @@ func genConfig() config {
 	flag.String(flag.DefaultConfigFlagname, "", "path to config file")
 	flag.StringVar(&c.statsdHosts, "statsd-host", "localhost:8125:udp", "comma separated list of ip:port:proto for statsD host(s)")
 	flag.StringVar(&c.prefix, "prefix", filepath.Base(defaultPrefix), "prefix for metrics")
+	flag.DurationVar(&c.runTime, "run-time", time.Duration(0), "how long to run, 0=forever")
 	flag.DurationVar(&c.flushInterval, "flush-interval", 10*time.Second, "how often to flush metrics")
 	flag.IntVar(&c.spawnDrift, "spawn-drift", 10, "spread new agent generation by 0-n seconds")
 	flag.StringVar(&c.tagFormat, "tag-format", "", "format of the tags to send. accepted values \"datadog\" or \"influx\"")
