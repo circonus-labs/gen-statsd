@@ -100,6 +100,9 @@ func (ac *AgentController) Start(c config) error {
 			log.Printf("error creating client for target %s: %s", t, err)
 			continue
 		}
+		if c.sampleRate > 0 {
+			client = client.Clone(statsd.SampleRate(float32(c.sampleRate)))
+		}
 		statsdClients = append(statsdClients, client)
 	}
 
@@ -117,7 +120,7 @@ func (ac *AgentController) Start(c config) error {
 				ac.wg.Done()
 				return
 			}
-			agent.timerSamples = c.tsamples
+			agent.timerSamples = c.timerSamples
 			log.Printf("launching agent %d\n", id)
 			agent.Start(ac.ctx)
 			ac.wg.Done()

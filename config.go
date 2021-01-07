@@ -23,11 +23,12 @@ type config struct {
 	runTime       time.Duration
 	spawnDrift    int
 	counters      int
+	sampleRate    float64
 	gauges        int
 	timers        int
 	timerValueMax int
 	timerValueMin int
-	tsamples      int
+	timerSamples  int
 	agents        int
 	version       bool
 }
@@ -52,8 +53,9 @@ func genConfig() config {
 	flag.IntVar(&c.timerValueMin, "timer-value-min", 0, "min timer value")
 	flag.IntVar(&c.gauges, "gauges", 30, "number of gauges for each agent to hold")
 	flag.IntVar(&c.timers, "timers", 20, "number of timers for each agent to hold")
-	flag.IntVar(&c.tsamples, "timer-samples", 10, "number of timer samples per iteration")
+	flag.IntVar(&c.timerSamples, "timer-samples", 10, "number of timer samples per iteration")
 	flag.IntVar(&c.agents, "agents", 10, "max number of agents to run concurrently")
+	flag.Float64Var(&c.sampleRate, "sample-rate", 0, "sampling rate")
 	flag.BoolVar(&c.version, "version", false, "show version information")
 	flag.Parse()
 
