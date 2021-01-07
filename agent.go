@@ -19,6 +19,11 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
+const (
+	timerSampleMax = 1000
+	timerSampleMin = 1
+)
+
 //AgentController is the main controller of the agents
 type AgentController struct {
 	sig  chan os.Signal
@@ -34,7 +39,8 @@ type Agent struct {
 	counterNames  []string
 	gaugeNames    []string
 	timerNames    []string
-	statsdClient  *statsd.Client
+	timerSamples  int
+	statsdClients []*statsd.Client
 }
 
 //NewAgentController creates a new agent pool
@@ -54,16 +60,58 @@ func (ac *AgentController) Start(c config) error {
 	SignalNotifySetup(ac.sig)
 	go HandleSignals(ac.cncl, ac.sig)
 
+	targets := strings.Split(c.statsdHosts, ",")
+	statsdClients := make([]*statsd.Client, 0)
+	for _, t := range targets {
+		ip := ""
+		port := "8125"
+		proto := "udp"
+		spec := strings.Split(t, ":")
+		switch len(spec) {
+		case 3:
+			ip = spec[0]
+			port = spec[1]
+			proto = spec[2]
+		case 2:
+			ip = spec[0]
+			port = spec[1]
+		case 1:
+			ip = spec[0]
+		default:
+			log.Printf("invalid target spec (%s)", t)
+			continue
+		}
+		client, err := statsd.New(
+			statsd.Address(ip+":"+port),
+			statsd.Network(proto),
+			statsd.FlushPeriod(c.flushInterval),
+			statsd.Prefix(c.prefix),
+			statsd.ErrorHandler(func(err error) {
+				log.Printf("error sending metrics to target %s: %s\n", t, err)
+			}),
+		)
+		if err != nil {
+			log.Printf("error creating client for target %s: %s", t, err)
+			continue
+		}
+		statsdClients = append(statsdClients, client)
+	}
+
+	if len(statsdClients) == 0 {
+		log.Fatal("no targets defined")
+	}
+
 	for i := 0; i < c.agents; i++ {
 		ac.wg.Add(1)
 		go func(id int) {
-			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.flushInterval, c.statsdHost, c.prefix, c.tags, c.network, c.tagFormat)
+			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.flushInterval, statsdClients, c.tags, c.tagFormat)
 			if err != nil {
 				log.Printf("error instantiating agent%d: %s\n", id, err)
 				ac.ctx.Done()
 				ac.wg.Done()
 				return
 			}
+			agent.timerSamples = c.tsamples
 			log.Printf("launching agent %d\n", id)
 			agent.Start(ac.ctx)
 			ac.wg.Done()
@@ -79,42 +127,28 @@ func (ac *AgentController) Start(c config) error {
 }
 
 //CreateAgent creates a new instance of an Agent
-func CreateAgent(id, counters, gauges, timers int, flush time.Duration, addr, prefix, tags, network, tagFormat string) (*Agent, error) {
-
-	//Setup some variables
-	var client *statsd.Client
-	var tagOption statsd.Option
-
-	//Create the client
-	client, err := statsd.New(
-		statsd.Address(addr),
-		statsd.Network(network),
-		statsd.FlushPeriod(flush),
-		statsd.Prefix(prefix),
-		statsd.ErrorHandler(func(err error) {
-			log.Printf("error sending metrics: %s\n", err)
-		}),
-	)
-	if err != nil {
-		log.Printf("error creating statsd client: %s\n", err)
-	}
+func CreateAgent(id, counters, gauges, timers int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string) (*Agent, error) {
 
 	//Check the tagformat
 	if tagFormat != "" {
-		client, err = parseTagFormat(client, tagFormat)
-		if err != nil {
-			return nil, err
+		for idx, c := range targets {
+			client, err := parseTagFormat(c, tagFormat)
+			if err != nil {
+				return nil, err
+			}
+			targets[idx] = client
 		}
 	}
 
 	//Check for tags
 	if tags != "" {
-		var err error
-		tagOption, err = parseTags(tags)
+		tagOption, err := parseTags(tags)
 		if err != nil {
 			return nil, err
 		}
-		client = client.Clone(tagOption)
+		for idx, c := range targets {
+			targets[idx] = c.Clone(tagOption)
+		}
 	}
 
 	a := &Agent{
@@ -123,7 +157,7 @@ func CreateAgent(id, counters, gauges, timers int, flush time.Duration, addr, pr
 		counterNames:  genMetricsNames("counter", id, counters),
 		gaugeNames:    genMetricsNames("gauge", id, gauges),
 		timerNames:    genMetricsNames("timer", id, timers),
-		statsdClient:  client,
+		statsdClients: targets,
 	}
 	return a, nil
 }
@@ -149,7 +183,7 @@ func (a *Agent) Start(ctx context.Context) {
 				wg.Done()
 			}()
 			wg.Wait()
-			log.Printf("flushed %d counters, %d gauges, %d timers for agent %d\n", len(a.counterNames), len(a.gaugeNames), len(a.timerNames), a.id)
+			log.Printf("flushed %d counters, %d gauges, %d timers(*%d samples) for agent %d\n", len(a.counterNames), len(a.gaugeNames), len(a.timerNames), a.timerSamples, a.id)
 		case <-ctx.Done():
 			ticker.Stop()
 			return
@@ -169,7 +203,13 @@ func (a *Agent) done(ctx context.Context) bool {
 
 func (a *Agent) genCounters(ctx context.Context) {
 	for _, name := range a.counterNames {
-		a.statsdClient.Count(name, rand.Intn(10))
+		val := rand.Intn(10)
+		for _, c := range a.statsdClients {
+			c.Count(name, val)
+			if a.done(ctx) {
+				break
+			}
+		}
 		if a.done(ctx) {
 			break
 		}
@@ -178,7 +218,13 @@ func (a *Agent) genCounters(ctx context.Context) {
 
 func (a *Agent) genGauges(ctx context.Context) {
 	for _, name := range a.gaugeNames {
-		a.statsdClient.Gauge(name, rand.Intn(500))
+		val := rand.Intn(500)
+		for _, c := range a.statsdClients {
+			c.Gauge(name, val)
+			if a.done(ctx) {
+				break
+			}
+		}
 		if a.done(ctx) {
 			break
 		}
@@ -187,7 +233,18 @@ func (a *Agent) genGauges(ctx context.Context) {
 
 func (a *Agent) genTimers(ctx context.Context) {
 	for _, name := range a.timerNames {
-		a.statsdClient.Timing(name, rand.Intn(1000))
+		for i := 0; i < a.timerSamples; i++ {
+			val := rand.Float64() * (timerSampleMax - timerSampleMin)
+			for _, c := range a.statsdClients {
+				c.Timing(name, val)
+				if a.done(ctx) {
+					break
+				}
+			}
+			if a.done(ctx) {
+				break
+			}
+		}
 		if a.done(ctx) {
 			break
 		}
@@ -195,8 +252,10 @@ func (a *Agent) genTimers(ctx context.Context) {
 }
 
 //flushOnce is to facilitate controlled testing
-func (a *Agent) flushOnce() {
-	a.statsdClient.Flush()
+func (a *Agent) flushOnce() { //nolint:go-lint,unused
+	for _, c := range a.statsdClients {
+		c.Flush()
+	}
 }
 
 func genMetricsNames(metricType string, id, n int) []string {

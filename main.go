@@ -24,6 +24,6 @@ func main() {
 
 	//Start the agent controller
 	agentController := NewAgentController()
-	agentController.Start(conf)
+	_ = agentController.Start(conf)
 
 }

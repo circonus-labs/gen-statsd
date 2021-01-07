@@ -7,12 +7,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"testing"
 	"time"
-)
 
-var agent *Agent
+	statsd "gopkg.in/alexcesaro/statsd.v2"
+)
 
 func TestParseTags(t *testing.T) {
 
@@ -61,6 +62,7 @@ func TestGenMetricsNames(t *testing.T) {
 func TestCreateAgent(t *testing.T) {
 
 	//Test Setup
+
 	id := 0
 	num := 1
 	flush := time.Second * 0
@@ -71,21 +73,35 @@ func TestCreateAgent(t *testing.T) {
 	tagFormat1 := "datadog"
 	tagFormat2 := "influx"
 	badTagFormat := "not a tag format"
+	client, err := statsd.New(
+		statsd.Address(addr),
+		statsd.Network("udp"),
+		statsd.FlushPeriod(flush),
+		statsd.Prefix(prefix),
+		statsd.ErrorHandler(func(err error) {
+			log.Printf("error sending metrics to target %s: %s\n", addr, err)
+		}),
+	)
+	if err != nil {
+		t.Fatalf("error creating client for target %s: %s", addr, err)
+	}
+
+	clients := []*statsd.Client{client}
 
 	//Run tests and verify output
-	_, err := CreateAgent(id, num, num, num, flush, addr, prefix, goodTags, "udp", tagFormat1)
+	_, err = CreateAgent(id, num, num, num, flush, clients, goodTags, tagFormat1)
 	if err != nil {
 		t.Errorf("expected no error, got: %s", err)
 	}
-	_, err = CreateAgent(id, num, num, num, flush, addr, prefix, badTags, "udp", tagFormat1)
+	_, err = CreateAgent(id, num, num, num, flush, clients, badTags, tagFormat1)
 	if err == nil {
 		t.Errorf("expected error, got: %s", err)
 	}
-	_, err = CreateAgent(id, num, num, num, flush, addr, prefix, goodTags, "udp", tagFormat2)
+	_, err = CreateAgent(id, num, num, num, flush, clients, goodTags, tagFormat2)
 	if err != nil {
 		t.Errorf("expected no error, got: %s", err)
 	}
-	_, err = CreateAgent(id, num, num, num, flush, addr, prefix, goodTags, "udp", badTagFormat)
+	_, err = CreateAgent(id, num, num, num, flush, clients, goodTags, badTagFormat)
 	if err == nil {
 		t.Errorf("expected error, got: %s", err)
 	}
