@@ -212,9 +212,16 @@ func (a *Agent) done(ctx context.Context) bool {
 	}
 }
 
+func (a *Agent) getSample() int {
+	if a.valueMax == a.valueMin {
+		return a.valueMax
+	}
+	return rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
+}
+
 func (a *Agent) genCounters(ctx context.Context) {
 	for _, name := range a.counterNames {
-		val := rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
+		val := a.getSample()
 		for _, c := range a.statsdClients {
 			c.Count(name, val)
 			if a.done(ctx) {
@@ -229,7 +236,7 @@ func (a *Agent) genCounters(ctx context.Context) {
 
 func (a *Agent) genGauges(ctx context.Context) {
 	for _, name := range a.gaugeNames {
-		val := rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
+		val := a.getSample()
 		for _, c := range a.statsdClients {
 			c.Gauge(name, val)
 			if a.done(ctx) {
@@ -245,7 +252,7 @@ func (a *Agent) genGauges(ctx context.Context) {
 func (a *Agent) genTimers(ctx context.Context) {
 	for _, name := range a.timerNames {
 		for i := 0; i < a.timerSamples; i++ {
-			val := rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
+			val := a.getSample()
 			for _, c := range a.statsdClients {
 				c.Timing(name, val)
 				if a.done(ctx) {
