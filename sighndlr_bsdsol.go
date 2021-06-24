@@ -21,16 +21,16 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-//signalNotifySetup sets up the signals and their channel
+// signalNotifySetup sets up the signals and their channel
 func (ac *AgentController) signalNotifySetup() {
 	signal.Notify(ac.sig, os.Interrupt, unix.SIGTERM, unix.SIGHUP, unix.SIGPIPE, unix.SIGINFO)
 }
 
-//handleSignals handles exiting the program based on different signals
+// handleSignals handles exiting the program based on different signals
 func (ac *AgentController) handleSignals() {
 	const stackTraceBufferSize = 1 * units.MiB
 
-	//pre-allocate a buffer for stacktrace
+	// pre-allocate a buffer for stacktrace
 	buf := make([]byte, stackTraceBufferSize)
 
 	for {

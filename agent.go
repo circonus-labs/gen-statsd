@@ -19,28 +19,28 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
-//AgentController is the main controller of the agents
-type AgentController struct {
+// AgentController is the main controller of the agents
+type AgentController struct { //nolint:govet
 	sig  chan os.Signal
 	wg   sync.WaitGroup
 	ctx  context.Context
 	cncl context.CancelFunc
 }
 
-//Agent is a struct for generating and sending StatsD data
+// Agent is a struct for generating and sending StatsD data
 type Agent struct {
-	id            int
-	flushInterval time.Duration
 	counterNames  []string
 	gaugeNames    []string
 	timerNames    []string
+	statsdClients []*statsd.Client
+	id            int
+	flushInterval time.Duration
 	timerSamples  int
 	valueMax      int
 	valueMin      int
-	statsdClients []*statsd.Client
 }
 
-//NewAgentController creates a new agent pool
+// NewAgentController creates a new agent pool
 func NewAgentController() *AgentController {
 	rand.Seed(time.Now().UnixNano())
 	ctx, cancel := context.WithCancel(context.Background())
@@ -52,13 +52,13 @@ func NewAgentController() *AgentController {
 	}
 }
 
-//Start kicks off the main process of sending statsD metrics from agents
-func (ac *AgentController) Start(c config) error {
+// Start kicks off the main process of sending statsD metrics from agents
+func (ac *AgentController) Start(c config) {
 
 	if c.runTime > time.Duration(0) {
 		go func() {
 			time.Sleep(c.runTime)
-			log.Printf("run time (%s) reached, cancelling", c.runTime.String())
+			log.Printf("run time (%s) reached, canceling", c.runTime.String())
 			ac.cncl()
 		}()
 	}
@@ -69,6 +69,7 @@ func (ac *AgentController) Start(c config) error {
 	targets := strings.Split(c.statsdHosts, ",")
 	statsdClients := make([]*statsd.Client, 0)
 	for _, t := range targets {
+		t := t
 		ip := ""
 		port := "8125"
 		proto := "udp"
@@ -128,17 +129,16 @@ func (ac *AgentController) Start(c config) error {
 		if done(ac.ctx) {
 			break
 		}
-		time.Sleep(time.Duration(rand.Intn(c.spawnDrift)) * time.Second)
+		time.Sleep(time.Duration(rand.Intn(c.spawnDrift)) * time.Second) //nolint:gosec
 	}
 
 	ac.wg.Wait()
-	return nil
 }
 
-//CreateAgent creates a new instance of an Agent
+// CreateAgent creates a new instance of an Agent
 func CreateAgent(id, counters, gauges, timers, max, min int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string) (*Agent, error) {
 
-	//Check the tagformat
+	// Check the tagformat
 	if tagFormat != "" {
 		for idx, c := range targets {
 			client, err := parseTagFormat(c, tagFormat)
@@ -149,7 +149,7 @@ func CreateAgent(id, counters, gauges, timers, max, min int, flush time.Duration
 		}
 	}
 
-	//Check for tags
+	// Check for tags
 	if tags != "" {
 		tagOption, err := parseTags(tags)
 		if err != nil {
@@ -173,7 +173,7 @@ func CreateAgent(id, counters, gauges, timers, max, min int, flush time.Duration
 	return a, nil
 }
 
-//Start starts an agent generating and sending metrics to the desired host
+// Start starts an agent generating and sending metrics to the desired host
 func (a *Agent) Start(ctx context.Context) {
 	ticker := time.NewTicker(a.flushInterval)
 	for {
@@ -216,7 +216,7 @@ func (a *Agent) getSample() int {
 	if a.valueMax == a.valueMin {
 		return a.valueMax
 	}
-	return rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin
+	return rand.Intn(a.valueMax-a.valueMin+1) + a.valueMin //nolint:gosec
 }
 
 func (a *Agent) genCounters(ctx context.Context) {
@@ -269,7 +269,7 @@ func (a *Agent) genTimers(ctx context.Context) {
 	}
 }
 
-//flushOnce is to facilitate controlled testing
+// flushOnce is to facilitate controlled testing
 func (a *Agent) flushOnce() { //nolint:go-lint,unused
 	for _, c := range a.statsdClients {
 		c.Flush()
