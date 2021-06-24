@@ -8,6 +8,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"strconv"
 	"testing"
 	"time"
@@ -17,12 +18,12 @@ import (
 
 func TestParseTags(t *testing.T) {
 
-	//Test setup
+	// Test setup
 	goodTags := "key1:value1,key2:value2,key3:value3"
 	badTags1 := "key1:value1,key2:value2,key3"
 	badTags2 := "key1:value1,key2:value2,key3:"
 
-	//Run the tests and verify output
+	// Run the tests and verify output
 	_, err := parseTags(goodTags)
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
@@ -41,12 +42,12 @@ func TestParseTags(t *testing.T) {
 
 func TestGenMetricsNames(t *testing.T) {
 
-	//Test Setup
+	// Test Setup
 	id := 0
 	metricType := "counter"
 	n := 3
 
-	//Run tests and verify output
+	// Run tests and verify output
 	metricNames := genMetricsNames(metricType, id, n)
 	if len(metricNames) != 3 {
 		t.Errorf("Expected length of slice to be %d, got %d", n, len(metricNames))
@@ -61,7 +62,20 @@ func TestGenMetricsNames(t *testing.T) {
 
 func TestCreateAgent(t *testing.T) {
 
-	//Test Setup
+	srv, err := net.ListenPacket("udp", ":8125")
+	if err != nil {
+		t.Fatalf("creating server %s", err)
+	}
+	defer srv.Close()
+	go func() {
+		buf := make([]byte, 1024)
+		_, _, err = srv.ReadFrom(buf)
+		if err != nil {
+			return
+		}
+	}()
+
+	// Test Setup
 
 	id := 0
 	num := 1
@@ -90,7 +104,7 @@ func TestCreateAgent(t *testing.T) {
 
 	clients := []*statsd.Client{client}
 
-	//Run tests and verify output
+	// Run tests and verify output
 	_, err = CreateAgent(id, num, num, num, timerMax, timerMin, flush, clients, goodTags, tagFormat1)
 	if err != nil {
 		t.Errorf("expected no error, got: %s", err)
