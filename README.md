@@ -9,7 +9,7 @@ gen-statsd is an experimental tool written in Go for load and signal testing wit
 ### Command-line Flags
 
 ```
-Usage of gen-statsd:
+Usage of ./gen-statsd:
   -agents=10: max number of agents to run concurrently
   -config="": path to config file
   -counters=50: number of counters for each agent to hold
@@ -19,7 +19,7 @@ Usage of gen-statsd:
   -run-time=0s: how long to run, 0=forever
   -sample-rate=0: sampling rate
   -spawn-drift=10: spread new agent generation by 0-n seconds
-  -statsd-host="localhost:8125:udp": comma separated list of ip:port:proto for statsD host(s)
+  -statsd-hosts="localhost:8125:udp": comma separated list of ip:port:proto for statsD host(s)
   -tag-format="": format of the tags to send. accepted values "datadog" or "influx"
   -tags="": list of K:V comma separated tags. Example: key1:tag1,key2:tag2
   -timer-samples=10: number of timer samples per iteration
@@ -42,7 +42,7 @@ Usage of gen-statsd:
   |RUN_TIME       |how long to run, 0=forever                                       |
   |SAMPLE_RATE    |sampling rate (default 0)                                        |
   |SPAWN_DRIFT    |spread new agent generation by 0-n seconds (default 10)          |
-  |STATSD_HOST    |comma separated list of ip:port:proto for statsD host(s)         |
+  |STATSD_HOSTS   |comma separated list of ip:port:proto for statsD host(s)         |
   |TAG_FORMAT     |format of the tags to send. accepted values "datadog" or "influx |
   |TAGS           |list of K:V comma separated tags. Example: key1:tag1,key2:tag2   |
   |TIMERS         |number of timers for each agent to hold (default 20)             |
