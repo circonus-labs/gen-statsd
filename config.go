@@ -41,7 +41,7 @@ func genConfig() config {
 		log.Fatal(err)
 	}
 	flag.String(flag.DefaultConfigFlagname, "", "path to config file")
-	flag.StringVar(&c.statsdHosts, "statsd-host", "localhost:8125:udp", "comma separated list of ip:port:proto for statsD host(s)")
+	flag.StringVar(&c.statsdHosts, "statsd-hosts", "localhost:8125:udp", "comma separated list of ip:port:proto for statsD host(s)")
 	flag.StringVar(&c.prefix, "prefix", filepath.Base(defaultPrefix), "prefix for metrics")
 	flag.DurationVar(&c.runTime, "run-time", time.Duration(0), "how long to run, 0=forever")
 	flag.DurationVar(&c.flushInterval, "flush-interval", 10*time.Second, "how often to flush metrics")
