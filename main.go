@@ -13,16 +13,16 @@ import (
 
 func main() {
 
-	//Generate the config
+	// Generate the config
 	conf := genConfig()
 
-	//Check and see if version is being called
+	// Check and see if version is being called
 	if conf.version {
 		fmt.Printf("%s v%s - commit: %s, date: %s, tag: %s\n", release.NAME, release.VERSION, release.COMMIT, release.DATE, release.TAG)
 		return
 	}
 
-	//Start the agent controller
+	// Start the agent controller
 	agentController := NewAgentController()
 	agentController.Start(conf)
 

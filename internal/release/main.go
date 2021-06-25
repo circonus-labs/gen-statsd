@@ -7,17 +7,17 @@ package release
 
 import "expvar"
 
-//NAME is the name of this application
+// NAME is the name of this application
 const NAME = "gen-statsd"
 
 var (
-	//COMMIT of release in git repo
+	// COMMIT of release in git repo
 	COMMIT = "undef"
-	//DATE of release
+	// DATE of release
 	DATE = "undef"
-	//TAG of release
+	// TAG of release
 	TAG = "undef"
-	//VERSION of the release
+	// VERSION of the release
 	VERSION = "undef"
 )
 
