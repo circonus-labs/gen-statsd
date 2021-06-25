@@ -14,21 +14,21 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"syscall"
 
 	"github.com/alecthomas/units"
+	"golang.org/x/sys/windows"
 )
 
-//signalNotifySetup sets up the signals and their channel
+// signalNotifySetup sets up the signals and their channel
 func (ac *AgentController) signalNotifySetup() {
-	signal.Notify(ac.sig, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGPIPE, syscall.SIGTRAP)
+	signal.Notify(ac.sig, os.Interrupt, windows.SIGTERM, windows.SIGHUP, windows.SIGPIPE, windows.SIGTRAP)
 }
 
-//handleSignals handles exiting the program based on different signals
+// handleSignals handles exiting the program based on different signals
 func (ac *AgentController) handleSignals() {
 	const stackTraceBufferSize = 1 * units.MiB
 
-	//pre-allocate a buffer for stacktrace
+	// pre-allocate a buffer for stacktrace
 	buf := make([]byte, stackTraceBufferSize)
 
 	for {
@@ -36,12 +36,12 @@ func (ac *AgentController) handleSignals() {
 		case sig := <-ac.sig:
 			log.Printf("signal %s received\n", sig.String())
 			switch sig {
-			case os.Interrupt, syscall.SIGTERM:
+			case os.Interrupt, windows.SIGTERM:
 				ac.cncl()
 				return
-			case syscall.SIGPIPE, syscall.SIGHUP:
+			case windows.SIGPIPE, windows.SIGHUP:
 				// Noop
-			case syscall.SIGTRAP:
+			case windows.SIGTRAP:
 				stackLen := runtime.Stack(buf, true)
 				fmt.Printf("=== received SIGINFO ===\n*** goroutine dump...\n%s\n*** end\n", buf[:stackLen])
 			default:
