@@ -58,7 +58,7 @@ func genConfig() config {
 	flag.IntVar(&c.agents, "agents", 10, "max number of agents to run concurrently")
 	flag.Float64Var(&c.sampleRate, "sample-rate", 0, "sampling rate")
 	flag.BoolVar(&c.version, "version", false, "show version information")
-	flag.BoolVar(&c.quiet, "quiet", true, "run gen-statsd in quiet mode")
+	flag.BoolVar(&c.quiet, "quiet", false, "run gen-statsd in quiet mode")
 	flag.Parse()
 
 	return c
