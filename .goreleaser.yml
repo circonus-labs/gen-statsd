@@ -33,39 +33,39 @@ builds:
       - -X github.com/circonus-labs/gen-statsd/internal/release.DATE={{.Date}} 
       - -X github.com/circonus-labs/gen-statsd/internal/release.TAG={{.Tag}}
 
-dockers:
-  -
-    goos: linux
-    goarch: amd64
-    goarm: ''
-    binaries:
-      - gen-statsd
-    image_templates:
-      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}"
-      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}"
-      - "circonus/{{.ProjectName}}:latest"
-    skip_push: false
-    dockerfile: deploy/docker/x86_64/Dockerfile
-    build_flag_templates:
-      - "--label=org.label-schema.schema-version=1.0"
-      - "--label=org.label-schema.version={{.Version}}"
-      - "--label=org.label-schema.name={{.ProjectName}}"
-  -
-    goos: linux
-    goarch: arm64
-    goarm: ''
-    binaries:
-      - gen-statsd
-    image_templates:
-      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}-arm64"
-      - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}-arm64"
-      - "circonus/{{.ProjectName}}:latest-arm64"
-    skip_push: false
-    dockerfile: deploy/docker/arm64/Dockerfile
-    build_flag_templates:
-      - "--label=org.label-schema.schema-version=1.0"
-      - "--label=org.label-schema.version={{.Version}}"
-      - "--label=org.label-schema.name={{.ProjectName}}"
+# dockers:
+#   -
+#     goos: linux
+#     goarch: amd64
+#     goarm: ''
+#     binaries:
+#       - gen-statsd
+#     image_templates:
+#       - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}"
+#       - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}"
+#       - "circonus/{{.ProjectName}}:latest"
+#     skip_push: false
+#     dockerfile: deploy/docker/x86_64/Dockerfile
+#     build_flag_templates:
+#       - "--label=org.label-schema.schema-version=1.0"
+#       - "--label=org.label-schema.version={{.Version}}"
+#       - "--label=org.label-schema.name={{.ProjectName}}"
+#   -
+#     goos: linux
+#     goarch: arm64
+#     goarm: ''
+#     binaries:
+#       - gen-statsd
+#     image_templates:
+#       - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}.{{.Patch}}-arm64"
+#       - "circonus/{{.ProjectName}}:{{.Major}}.{{.Minor}}-arm64"
+#       - "circonus/{{.ProjectName}}:latest-arm64"
+#     skip_push: false
+#     dockerfile: deploy/docker/arm64/Dockerfile
+#     build_flag_templates:
+#       - "--label=org.label-schema.schema-version=1.0"
+#       - "--label=org.label-schema.version={{.Version}}"
+#       - "--label=org.label-schema.name={{.ProjectName}}"
 
 archives:
   - 
