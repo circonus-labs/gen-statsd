@@ -13,7 +13,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
-        go-version: '1.15.2'
+        go-version: '1.16.5'
     
     # Install dependencies
     - name: Install dependencies
@@ -42,12 +42,12 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.15
-      - 
-        name: Docker Login
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+      # - 
+      #   name: Docker Login
+      #   uses: docker/login-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKER_USERNAME }}
+      #     password: ${{ secrets.DOCKER_TOKEN }}
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
@@ -56,14 +56,14 @@ jobs:
           args: release --rm-dist --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - 
-        name: Push Docker Readme
-        uses: christian-korneck/update-container-description-action@v1
-        env:
-          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
-        with:
-          destination_container_repo: circonus/gen-statsd
-          provider: dockerhub
-          short_description: 'StatsD Traffic Generator'
-          readme_file: 'deploy/docker/README.md'
+      # - 
+        # name: Push Docker Readme
+        # uses: christian-korneck/update-container-description-action@v1
+        # env:
+        #   DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+        #   DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+        # with:
+        #   destination_container_repo: circonus/gen-statsd
+        #   provider: dockerhub
+        #   short_description: 'StatsD Traffic Generator'
+        #   readme_file: 'deploy/docker/README.md'
