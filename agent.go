@@ -38,6 +38,7 @@ type Agent struct {
 	timerSamples  int
 	valueMax      int
 	valueMin      int
+	quiet         bool
 }
 
 // NewAgentController creates a new agent pool
@@ -114,7 +115,7 @@ func (ac *AgentController) Start(c config) {
 	for i := 0; i < c.agents; i++ {
 		ac.wg.Add(1)
 		go func(id int) {
-			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.valueMax, c.valueMin, c.flushInterval, statsdClients, c.tags, c.tagFormat)
+			agent, err := CreateAgent(id, c.counters, c.gauges, c.timers, c.valueMax, c.valueMin, c.flushInterval, statsdClients, c.tags, c.tagFormat, c.quiet)
 			if err != nil {
 				log.Printf("error instantiating agent%d: %s\n", id, err)
 				ac.ctx.Done()
@@ -122,7 +123,9 @@ func (ac *AgentController) Start(c config) {
 				return
 			}
 			agent.timerSamples = c.timerSamples
-			log.Printf("launching agent %d\n", id)
+			if !c.quiet {
+				log.Printf("launching agent %d\n", id)
+			}
 			agent.Start(ac.ctx)
 			ac.wg.Done()
 		}(i)
@@ -136,7 +139,7 @@ func (ac *AgentController) Start(c config) {
 }
 
 // CreateAgent creates a new instance of an Agent
-func CreateAgent(id, counters, gauges, timers, max, min int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string) (*Agent, error) {
+func CreateAgent(id, counters, gauges, timers, max, min int, flush time.Duration, targets []*statsd.Client, tags, tagFormat string, quiet bool) (*Agent, error) {
 
 	// Check the tagformat
 	if tagFormat != "" {
@@ -194,7 +197,9 @@ func (a *Agent) Start(ctx context.Context) {
 				wg.Done()
 			}()
 			wg.Wait()
-			log.Printf("flushed %d counters, %d gauges, %d timers(*%d samples) for agent %d\n", len(a.counterNames), len(a.gaugeNames), len(a.timerNames), a.timerSamples, a.id)
+			if !a.quiet {
+				log.Printf("flushed %d counters, %d gauges, %d timers(*%d samples) for agent %d\n", len(a.counterNames), len(a.gaugeNames), len(a.timerNames), a.timerSamples, a.id)
+			}
 		case <-ctx.Done():
 			ticker.Stop()
 			return

@@ -16,6 +16,7 @@ Usage of ./gen-statsd:
   -flush-interval=10s: how often to flush metrics
   -gauges=30: number of gauges for each agent to hold
   -prefix="gen-statsd": prefix for metrics
+  -quiet=true: run gen-statsd in quiet mode
   -run-time=0s: how long to run, 0=forever
   -sample-rate=0: sampling rate
   -spawn-drift=10: spread new agent generation by 0-n seconds
@@ -39,6 +40,7 @@ Usage of ./gen-statsd:
   |FLUSH_INTERVAL |how often to flush metrics (default 10s)                         |
   |GAUGES         |number of gauges for each agent to hold (default 30)             |
   |PREFIX         |prefix for metrics (default "gen-statsd")                        |
+  |QUIET          |run gen-statsd in quiet mode                                     |
   |RUN_TIME       |how long to run, 0=forever                                       |
   |SAMPLE_RATE    |sampling rate (default 0)                                        |
   |SPAWN_DRIFT    |spread new agent generation by 0-n seconds (default 10)          |
