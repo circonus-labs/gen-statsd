@@ -172,6 +172,7 @@ func CreateAgent(id, counters, gauges, timers, max, min int, flush time.Duration
 		valueMax:      max,
 		valueMin:      min,
 		statsdClients: targets,
+		quiet:         quiet,
 	}
 	return a, nil
 }
