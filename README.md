@@ -20,7 +20,7 @@ Usage of ./gen-statsd:
   -run-time=0s: how long to run, 0=forever
   -sample-rate=0: sampling rate
   -spawn-drift=10: spread new agent generation by 0-n seconds
-  -statsd-hosts="localhost:8125:udp": comma separated list of ip:port:proto for statsD host(s)
+  -statsd-hosts="localhost:8125:udp": comma separated list of ip:port:proto or UDS socket path for statsD host(s).
   -tag-format="": format of the tags to send. accepted values "datadog" or "influx"
   -tags="": list of K:V comma separated tags. Example: key1:tag1,key2:tag2
   -timer-samples=10: number of timer samples per iteration
@@ -32,25 +32,25 @@ Usage of ./gen-statsd:
 
 ### Environment Variables
 
-  | Variable      |                       Description                               |
-  |:-------------:|:----------------------------------------------------------------|
-  |AGENTS         |max number of agents to run concurrently (default 10)            |
-  |CONFIG         |path to config file                                              |
-  |COUNTERS       |number of counters for each agent to hold (default 50)           |
-  |FLUSH_INTERVAL |how often to flush metrics (default 10s)                         |
-  |GAUGES         |number of gauges for each agent to hold (default 30)             |
-  |PREFIX         |prefix for metrics (default "gen-statsd")                        |
-  |QUIET          |run gen-statsd in quiet mode                                     |
-  |RUN_TIME       |how long to run, 0=forever                                       |
-  |SAMPLE_RATE    |sampling rate (default 0)                                        |
-  |SPAWN_DRIFT    |spread new agent generation by 0-n seconds (default 10)          |
-  |STATSD_HOSTS   |comma separated list of ip:port:proto for statsD host(s)         |
-  |TAG_FORMAT     |format of the tags to send. accepted values "datadog" or "influx |
-  |TAGS           |list of K:V comma separated tags. Example: key1:tag1,key2:tag2   |
-  |TIMERS         |number of timers for each agent to hold (default 20)             |
-  |VALUE_MAX      |maximum value to send (default 100)                              |
-  |VALUE_MIN      |minimum value to send (default 0)                                |
-  |VERSION        |show version information                                         |
+  | Variable      |                       Description                                          |
+  |:-------------:|:---------------------------------------------------------------------------|
+  |AGENTS         |max number of agents to run concurrently (default 10)                       |
+  |CONFIG         |path to config file                                                         |
+  |COUNTERS       |number of counters for each agent to hold (default 50)                      |
+  |FLUSH_INTERVAL |how often to flush metrics (default 10s)                                    |
+  |GAUGES         |number of gauges for each agent to hold (default 30)                        |
+  |PREFIX         |prefix for metrics (default "gen-statsd")                                   |
+  |QUIET          |run gen-statsd in quiet mode                                                |
+  |RUN_TIME       |how long to run, 0=forever                                                  |
+  |SAMPLE_RATE    |sampling rate (default 0)                                                   |
+  |SPAWN_DRIFT    |spread new agent generation by 0-n seconds (default 10)                     |
+  |STATSD_HOSTS   |comma separated list of ip:port:proto or UDS socket path for statsD host(s) |
+  |TAG_FORMAT     |format of the tags to send. accepted values "datadog" or "influx            |
+  |TAGS           |list of K:V comma separated tags. Example: key1:tag1,key2:tag2              |
+  |TIMERS         |number of timers for each agent to hold (default 20)                        |
+  |VALUE_MAX      |maximum value to send (default 100)                                         |
+  |VALUE_MIN      |minimum value to send (default 0)                                           |
+  |VERSION        |show version information                                                    |
 
 ## Releases
 

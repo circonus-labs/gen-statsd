@@ -71,26 +71,26 @@ func (ac *AgentController) Start(c config) {
 	statsdClients := make([]*statsd.Client, 0)
 	for _, t := range targets {
 		t := t
-		ip := ""
-		port := "8125"
 		proto := "udp"
+		address := ":8125"
 		spec := strings.Split(t, ":")
 		switch len(spec) {
 		case 3:
-			ip = spec[0]
-			port = spec[1]
+			address = fmt.Sprintf("%s:%s", spec[0], spec[1])
 			proto = spec[2]
 		case 2:
-			ip = spec[0]
-			port = spec[1]
+			address = fmt.Sprintf("%s:%s", spec[0], spec[1])
 		case 1:
-			ip = spec[0]
+			address = spec[0]
+			if isSocket(address) {
+				proto = "unixgram"
+			}
 		default:
 			log.Printf("invalid target spec (%s)", t)
 			continue
 		}
 		client, err := statsd.New(
-			statsd.Address(ip+":"+port),
+			statsd.Address(address),
 			statsd.Network(proto),
 			statsd.FlushPeriod(c.flushInterval),
 			statsd.Prefix(c.prefix),
@@ -325,4 +325,12 @@ func done(ctx context.Context) bool {
 	default:
 		return false
 	}
+}
+
+func isSocket(path string) bool {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return fi.Mode()&os.ModeSocket != 0
 }
